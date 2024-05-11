@@ -29,7 +29,11 @@ const App = () => {
     noteService
       .getAll()
       .then(initialNotes => {
+        console.log("Successfully fetched notes.")
         setNotes(initialNotes)
+      })
+      .catch(error => {
+        console.log("Failed to fetch notes.")
       })
   }, [])
   if (!notes) { 
