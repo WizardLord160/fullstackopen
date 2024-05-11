@@ -92,11 +92,17 @@ const App = () => {
       .remove(p.id)
       .then(deletedPerson => {
         // Returns object of deleted person
-        const personCopy = [...persons].filter((entry) => entry.id != deletedPerson.id);
-        const filteredCopy = [...filteredPersons].filter((entry) => entry.id != deletedPerson.id);
+        const personCopy = [...persons].filter((entry) => entry.id != p.id);
+        const filteredCopy = [...filteredPersons].filter((entry) => entry.id != p.id)
         setPersons(personCopy)
         setFilteredPersons(filteredCopy)
-        console.log(`Deleted ${deletedPerson.name}.`)
+        console.log(`Deleted ${p.name}.`)
+        setSuccessMessage(
+          `Deleted ${p.name}`
+        )
+        setTimeout(() => {
+          setSuccessMessage(null)
+        }, 5000)
       })
     }
   }
