@@ -13,7 +13,8 @@ const App = () => {
   const [newName, setNewName] = useState('')
   const [newPhone, setNewPhone] = useState('')
   const [nameLookup, setNameLookup] = useState('')
-  const [successMessage, setSuccessMessage] = useState('')
+  const [systemMessage, setSystemMessage] = useState('')
+  const [isSuccess, setIsSuccess] = useState(0)
 
   useEffect(() => {
     // Get all people from backend
@@ -41,19 +42,20 @@ const App = () => {
           // Use object to update the person's new number on the frontend
           setPersons(persons.map(p => p.id !== updatedPerson.id ? p : returnedPerson))
           setFilteredPersons(filteredPersons.map(p => p.id !== updatedPerson.id ? p : returnedPerson))
-          setSuccessMessage(
+          setIsSuccess(1)
+          setSystemMessage(
             `Updated ${returnedPerson.name}`
           )
           setTimeout(() => {
-            setSuccessMessage(null)
+            setSystemMessage(null)
           }, 5000)
           console.log(`Updated ${updatedPerson.name}`)
         })
         // If not found, person may have already been deleted
         .catch(error => {
-          setSuccessMessage(
-            
-          )
+          console.log(error)
+          setIsSuccess(0)
+          setSystemMessage(`Could not update ${updatedPerson}, because they no longer exist in the phonebook.`)
           // Update the frontend to reflect that person no longer exists
           setPersons(persons.filter(p => p.id !== alreadyExists.id))
           setFilteredPersons(filteredPersons.filter(p => p.id !== alreadyExists.id))
@@ -71,13 +73,24 @@ const App = () => {
           // Returns the newly created person object
           setPersons(persons.concat(newPerson))
           setFilteredPersons(filteredPersons.concat(newPerson))
-          setSuccessMessage(
+          setIsSuccess(1)
+          setSystemMessage(
             `Added ${newPerson.name}`
           )
           setTimeout(() => {
-            setSuccessMessage(null)
+            setSystemMessage(null)
           }, 5000)
           console.log(`Added ${newPerson.name}`)
+        })
+        .catch(error => {
+          setIsSuccess(0)
+          setSystemMessage(
+            `Error adding ${newName}: ${error.response.data.error}`
+          )
+          setTimeout(() => {
+            setSystemMessage(null)
+          }, 5000)
+          console.log(`Error adding ${newName}: ${error.response.data.error}`)
         })
     }
     // Clear the input fields in the frontend
@@ -97,11 +110,12 @@ const App = () => {
         setPersons(personCopy)
         setFilteredPersons(filteredCopy)
         console.log(`Deleted ${p.name}.`)
-        setSuccessMessage(
+        setIsSuccess(1)
+        setSystemMessage(
           `Deleted ${p.name}`
         )
         setTimeout(() => {
-          setSuccessMessage(null)
+          setSystemMessage(null)
         }, 5000)
       })
     }
@@ -133,8 +147,8 @@ const App = () => {
 
   return (
     <div>
-      <h2>Phonebook</h2>
-      <Notification message={successMessage} />
+      <h2>Phonebook v3</h2>
+      <Notification message={systemMessage} status={isSuccess}/>
       <FilterSearch nameLookup={nameLookup} handleNameLookupChange={handleNameLookupChange}/>
 
       <h2>add a new</h2>
