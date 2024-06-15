@@ -26,18 +26,18 @@ const mostBlogs = (blogs) => {
   let maxAuthor = ""
 
   blogs.forEach(blog => {
-    if (authorCount[blog.author]) {
-        authorCount[blog.author] += 1;
-    } else {
-        authorCount[blog.author] = 1;
-    }
+  if (authorCount[blog.author]) {
+    authorCount[blog.author] += 1;
+  } else {
+    authorCount[blog.author] = 1;
+  }
   });
 
   for (author in authorCount) {
-    if (authorCount[author] > maxCount) {
-        maxCount = authorCount[author];
-        maxAuthor = author;
-    }
+  if (authorCount[author] > maxCount) {
+    maxCount = authorCount[author];
+    maxAuthor = author;
+  }
   }
 
   return maxAuthor
@@ -49,23 +49,23 @@ const mostLikes = (blogs) => {
   let maxCount = 0
 
   blogs.forEach(blog => {
-    if (authorLikes[blog.author]) {
-      authorLikes[blog.author] += blog.likes
-    } else {
-      authorLikes[blog.author] = blog.likes
-    }
+  if (authorLikes[blog.author]) {
+    authorLikes[blog.author] += blog.likes
+  } else {
+    authorLikes[blog.author] = blog.likes
+  }
   })
 
   for (author in authorLikes) {
-    if (authorLikes[author] > maxCount) {
-        maxCount = authorLikes[author];
-        maxAuthor = author;
-    }
+  if (authorLikes[author] > maxCount) {
+    maxCount = authorLikes[author];
+    maxAuthor = author;
+  }
   }
 
   return {
-    author: maxAuthor,
-    likes: maxCount
+  author: maxAuthor,
+  likes: maxCount
   }
 }
 
