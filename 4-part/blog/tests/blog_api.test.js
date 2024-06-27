@@ -4,25 +4,19 @@ const supertest = require('supertest')
 const assert = require('node:assert')
 const app = require('../app')
 const Blog = require('../models/blog')
+const User = require('../models/user')
 const helper = require('./test_helper')
 
 const api = supertest(app)
 
-// Runs before every testcase
-beforeEach(async () => {
-  // Delete all the blogs
-  await Blog.deleteMany({})
-  await Blog.insertMany(helper.initialBlogs)
-  // // Recreate all the blogs from helper
-  // const blogObjects = helper.initialBlogs
-  //   .map(blog => new Blog(blog))
-  // // Save all the blogs, array of promises
-  // const promiseArray = blogObjects.map(blog => blog.save())
-  // // Wait for all the blogs to save before proceeding
-  // await Promise.all(promiseArray) // Transforms all promises into single promise
-})
-
 describe('test existing notes', () => {
+  // Runs before every testcase
+  beforeEach(async () => {
+  // Delete all the blogs and reinsert initial blogs
+    await Blog.deleteMany({})
+    await Blog.insertMany(helper.initialBlogs)
+  })
+  
   console.log('Entered test')
   test('correct amount of blog posts returned', async () => {
     const initialBlogs = await helper.blogsInDb()
@@ -36,30 +30,93 @@ describe('test existing notes', () => {
 })
 
 describe('crud operations', () => {
+  beforeEach(async () => {
+  // Delete all the blogs and reinsert initial blogs
+    await Blog.deleteMany({})
+    await Blog.insertMany(helper.initialBlogs)
+
+    // Delete initial users
+    await User.deleteMany({})
+    // Use initial users
+    const initUsers = await helper.initialUsers()
+    // console.log(initUsers)
+    await User.insertMany(initUsers)
+  })
+
   test('new blog post successfully created', async () => {
     const newBlog = {
       title: 'Falling in Fall',
       author: 'Kim Gaeul',
       url: 'http://www.starship-ent.com/',
-      likes: '4'
+      likes: '4',
     }
 
+    // Login to a user
+    const userDetails = {
+      username: 'fallingin__fall',
+      password: 'autumn'
+    }
+    const login = await api
+      .post(`/api/login/`)
+      .send(userDetails)
+      .expect(200)
+
+    // Send blog and include user token after logged in 
     const sendBlog = await api
       .post(`/api/blogs/`)
+      .set('Authorization', `Bearer ${login.body.token}`)
       .send(newBlog)
       .expect(201)
 
-      const blogsAtEnd = await helper.blogsInDb() 
+    const blogsAtEnd = await helper.blogsInDb() 
 
     assert.strictEqual(blogsAtEnd.length, helper.initialBlogs.length + 1)
   })
 
+  test('new blog post fails without token', async () => {
+    const newBlog = {
+      title: 'Falling in Fall',
+      author: 'Kim Gaeul',
+      url: 'http://www.starship-ent.com/',
+      likes: '4',
+    }
+
+    // Send blog and include user token after logged in 
+    const sendBlog = await api
+      .post(`/api/blogs/`)
+      .send(newBlog)
+      .expect(401)
+
+      assert.strictEqual(sendBlog.body.error, 'token invalid')
+  })
+
   test('blog post successfully deleted', async () => {
     const blogsAtStart = await helper.blogsInDb() 
-    const blogToDelete = blogsAtStart[0]
 
+    // Find Yujin's blog and user
+    const blogToDelete = await Blog.findOne({ author: "An Yujin" });
+    const user = await User.findOne({ username: "_yujin_an" });
+    // Assign the blog to user
+    blogToDelete.user = user.id
+    user.blogs = user.blogs.concat(blogToDelete.id)
+    // Save changes to database
+    await blogToDelete.save();
+    await user.save();
+
+    // Login to Yujin user
+    const userDetails = {
+      username: '_yujin_an',
+      password: 'puppy'
+    }
+    const login = await api
+      .post(`/api/login/`)
+      .send(userDetails)
+      .expect(200)
+
+    // Delete the user's blog
     const deleteBlog = await api
       .delete(`/api/blogs/${blogToDelete.id}`)
+      .set('Authorization', `Bearer ${login.body.token}`)
       .expect(204)
 
     const blogsAtEnd = await helper.blogsInDb() 
@@ -98,14 +155,27 @@ describe('validate fields', () => {
   })
 
   test('blog missing like field defaults to 0 likes', async () => {
+
     const newBlog = {
-      title: 'Rei of Sunshine',
-      author: 'Naoi Rei',
+      title: 'Falling in Fall',
+      author: 'Kim Gaeul',
       url: 'http://www.starship-ent.com/',
     }
 
+    // Login to a user
+    const userDetails = {
+      username: 'fallingin__fall',
+      password: 'autumn'
+    }
+    const login = await api
+      .post(`/api/login/`)
+      .send(userDetails)
+      .expect(200)
+
+    // Send blog and include user token after logged in 
     const sendBlog = await api
       .post(`/api/blogs/`)
+      .set('Authorization', `Bearer ${login.body.token}`)
       .send(newBlog)
       .expect(201)
 
@@ -114,13 +184,25 @@ describe('validate fields', () => {
 
   test('400 bad request if title missing', async () => {
     const newBlog = {
-      author: 'Leeseo',
+      author: 'Kim Gaeul',
       url: 'http://www.starship-ent.com/',
-      likes: 7
+      likes: 4
     }
 
+    // Login to a user
+    const userDetails = {
+      username: 'fallingin__fall',
+      password: 'autumn'
+    }
+    const login = await api
+      .post(`/api/login/`)
+      .send(userDetails)
+      .expect(200)
+
+    // Send blog and include user token after logged in 
     const sendBlog = await api
       .post(`/api/blogs/`)
+      .set('Authorization', `Bearer ${login.body.token}`)
       .send(newBlog)
       .expect(400)
 
@@ -129,13 +211,25 @@ describe('validate fields', () => {
 
   test('400 bad request if url missing', async () => {
     const newBlog = {
-      title: 'Tiger Bite',
-      author: 'Leeseo',
-      likes: 7
+      title: 'Falling in Fall',
+      author: 'Kim Gaeul',
+      likes: 4
     }
 
+    // Login to a user
+    const userDetails = {
+      username: 'fallingin__fall',
+      password: 'autumn'
+    }
+    const login = await api
+      .post(`/api/login/`)
+      .send(userDetails)
+      .expect(200)
+
+    // Send blog and include user token after logged in 
     const sendBlog = await api
       .post(`/api/blogs/`)
+      .set('Authorization', `Bearer ${login.body.token}`)
       .send(newBlog)
       .expect(400)
 
@@ -144,16 +238,28 @@ describe('validate fields', () => {
 
   test('400 bad request if url and title missing', async () => {
     const newBlog = {
-      author: 'Leeseo',
-      likes: 7
+      author: 'Kim Gaeul',
+      likes: 4
     }
 
+    // Login to a user
+    const userDetails = {
+      username: 'fallingin__fall',
+      password: 'autumn'
+    }
+    const login = await api
+      .post(`/api/login/`)
+      .send(userDetails)
+      .expect(200)
+
+    // Send blog and include user token after logged in 
     const sendBlog = await api
       .post(`/api/blogs/`)
+      .set('Authorization', `Bearer ${login.body.token}`)
       .send(newBlog)
       .expect(400)
 
-    assert.strictEqual(sendBlog.body.error, 'Blog validation failed: url: Path `url` is required., title: Path `title` is required.')
+    assert.strictEqual(sendBlog.body.error, 'Blog validation failed: title: Path `title` is required., url: Path `url` is required.')
   })
 })
 

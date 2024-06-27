@@ -1,0 +1,21 @@
+POST http://localhost:3001/api/blogs/ HTTP/1.1
+content-type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImZvcl9ldmVyeW91bmcxMCIsImlkIjoiNjY3OGM0M2I3OWMwMDc5NzA0YzJiNDNlIiwiaWF0IjoxNzE5MzcwMDc3fQ.gCuOVhT2k47CLjdgIntgRTOix4rN6zYnsAHRFdO9lwU
+
+{
+    "title": "LOVE DIVE",
+    "author": "Jang Wonyoung",
+    "url": "www.starship-ent.com",
+    "likes": "0"
+}
+
+# POST http://localhost:3001/api/blogs/ HTTP/1.1
+# content-type: application/json
+
+# {
+#     "title": "testing",
+#     "author": "dummy",
+#     "url": "www.google.com",
+#     "likes": "0",
+#     "userId": "6678cd627e3a4e92465c5521"
+# }

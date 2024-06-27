@@ -1,10 +1,36 @@
 const logger = require('./logger')
+const jwt = require('jsonwebtoken')
+const User = require('../models/user')
 
 const requestLogger = (request, response, next) => {
   logger.info('Method:', request.method)
   logger.info('Path:  ', request.path)
   logger.info('Body:  ', request.body)
   logger.info('---')
+  next()
+}
+
+const tokenExtractor = (request, response, next) => {
+  // Get the authorization header from the POST request
+  const authorization = request.get('authorization')
+  if (authorization && authorization.startsWith('Bearer ')) {
+    // Extract purely the token and add it to the request
+    request.token = authorization.replace('Bearer ', '')
+  }
+  next()
+}
+
+const userExtractor = async (request, response, next) => {
+  // Verify validity of user token
+  const decodedToken = jwt.verify(request.token, process.env.SECRET) // Decodes token and returns object with username and id
+  if (!decodedToken.id) {
+    // Only logged-in users with existing and correct token can create or delete blogs
+    return response.status(401).json({ error: 'token invalid' })
+  }
+
+  // Find author of blog and assign to request
+  request.user = await User.findById(decodedToken.id) 
+
   next()
 }
 
@@ -19,6 +45,10 @@ const errorHandler = (error, request, response, next) => {
     return response.status(400).send({ error: 'malformatted id' })
   } else if (error.name === 'ValidationError') {
     return response.status(400).json({ error: error.message })
+  } else if (error.name === 'MongoServerError' && error.message.includes('E11000 duplicate key error')) {
+    return response.status(400).json({ error: 'expected `username` to be unique' })
+  } else if (error.name ===  'JsonWebTokenError') {
+    return response.status(401).json({ error: 'token invalid' })
   }
 
   next(error)
@@ -27,5 +57,7 @@ const errorHandler = (error, request, response, next) => {
 module.exports = {
   requestLogger,
   unknownEndpoint,
+  tokenExtractor,
+  userExtractor,
   errorHandler
 }

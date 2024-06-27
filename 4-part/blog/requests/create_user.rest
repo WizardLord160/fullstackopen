@@ -1,0 +1,17 @@
+# POST http://localhost:3001/api/users/ HTTP/1.1
+# content-type: application/json
+
+# {
+#     "username": "for_everyoung10",
+#     "name": "Jang Wonyoung",
+#     "password": "luckyvicky"
+# }
+
+POST http://localhost:3001/api/users/ HTTP/1.1
+content-type: application/json
+
+{
+    "username": "_yujin_an",
+    "name": "An Yujin",
+    "password": "puppy"
+}
