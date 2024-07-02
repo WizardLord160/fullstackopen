@@ -23,6 +23,7 @@ const tokenExtractor = (request, response, next) => {
 const userExtractor = async (request, response, next) => {
   // Verify validity of user token
   const decodedToken = jwt.verify(request.token, process.env.SECRET) // Decodes token and returns object with username and id
+  // console.log("decodedToken", decodedToken)
   if (!decodedToken.id) {
     // Only logged-in users with existing and correct token can create or delete blogs
     return response.status(401).json({ error: 'token invalid' })

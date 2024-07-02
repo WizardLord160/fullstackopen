@@ -18,10 +18,7 @@ blogsRouter.post('/', middleware.userExtractor, async (request, response) => {
 
   // Create the new blog
   const blog = new Blog({
-    title: body.title,
-    author: body.author,
-    url: body.url,
-    likes: body.likes,
+    ...body,
     user: user.id
   })
   const savedBlog = await blog.save()
@@ -35,7 +32,9 @@ blogsRouter.post('/', middleware.userExtractor, async (request, response) => {
 
 blogsRouter.delete('/:id', middleware.userExtractor, async (request, response) => {
   const user = request.user
-  const body = request.body
+  // const body = request.body
+  console.log("USER", user)
+  console.log("ID", request.params.id)
 
   // Find author of blog
   const blog = await Blog.findById(request.params.id)
@@ -58,8 +57,11 @@ blogsRouter.delete('/:id', middleware.userExtractor, async (request, response) =
 
 blogsRouter.put('/:id', async (request, response) => {
   // Update a blog by id
-  // Update blog body (title, author, url, likes) with the new request body
+  // Updates blog body (title, author, url, likes) with the new request body
   // Signify to return new document not original
+  const body = request.body
+  const userInfo = body.user
+  body.user = body.user.id // Replace user (originally containing token information) with expected user objectid
   const updatedBlog = await Blog.findByIdAndUpdate(request.params.id, request.body, { new: true })
   response.json(updatedBlog)
 })
