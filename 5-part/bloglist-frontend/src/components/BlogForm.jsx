@@ -2,7 +2,7 @@ import { useState } from 'react'
 
 import blogService from '../services/blogs'
 
-const NewBlogForm = ({ blogs, setBlogs, setSysMessage }) => {
+const BlogForm = ({ blogs, setBlogs, setSysMessage, blogFormRef }) => {
   const [title, setTitle] = useState('')
   const [author, setAuthor] = useState('')
   const [url, setUrl] = useState('')
@@ -25,6 +25,8 @@ const NewBlogForm = ({ blogs, setBlogs, setSysMessage }) => {
       setTitle('')
       setAuthor('')
       setUrl('')
+      // Close form
+      blogFormRef.current.toggleVisibility()
 
       setSysMessage(`SUCCESS: a new blog ${createdBlog.title} by ${createdBlog.author} added`)
       setTimeout(() => {
@@ -72,4 +74,4 @@ const NewBlogForm = ({ blogs, setBlogs, setSysMessage }) => {
   )
 }
 
-export default NewBlogForm
+export default BlogForm
