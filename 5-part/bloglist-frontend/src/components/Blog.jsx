@@ -82,12 +82,11 @@ const Blog = ({ blog, blogs, setBlogs, setSysMessage }) => {
 
   return (
     <div style={blogContainer}>
-      {blog.title}
+      {blog.title} by {blog.author} 
       <button style={hideWhenVisible} onClick={toggleVisibility}>view</button>
       <button style={showWhenVisible} onClick={toggleVisibility}>hide</button>
-      <div style={showWhenVisible}>
-        <div style={{display: 'block'}}>
-          <div>{blog.author}</div>
+      <div style={showWhenVisible} id='blog-details'>
+        <div style={{display: 'block'}}>          
           <div>{blog.url}</div>
           <div>likes {blog.likes}<button onClick={handleLike}>like</button></div>
           <div>{blog.user.username}</div>
