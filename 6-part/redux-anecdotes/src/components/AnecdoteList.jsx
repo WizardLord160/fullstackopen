@@ -1,8 +1,13 @@
 import { useSelector, useDispatch } from 'react-redux'
 
 const AnecdoteList = () => {
-  const anecdotes = useSelector(state => state)
   const dispatch = useDispatch()
+  const anecdotes = useSelector(({ anecdotes, filter }) => {
+    if (filter === 'ALL') {
+      return anecdotes
+    }
+    return anecdotes.filter(anecdote => anecdote.content.includes(filter))
+  })
 
   const vote = (id) => {
     console.log('vote', id)
