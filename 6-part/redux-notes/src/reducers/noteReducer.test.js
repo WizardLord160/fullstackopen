@@ -5,12 +5,8 @@ describe('noteReducer', () => {
   test('returns new state with action NEW_NOTE', () => {
     const state = []
     const action = {
-      type: 'NEW_NOTE',
-      data: {
-        content: 'the app state is in redux store',
-        important: true,
-        id: 1
-      }
+      type: 'notes/createNote',
+      payload: 'the app state is in redux store',
     }
 
     deepFreeze(state)
@@ -33,12 +29,10 @@ describe('noteReducer', () => {
         id: 2
       }]
   
-    const action = {
-      type: 'TOGGLE_IMPORTANCE',
-      data: {
-        id: 2
+      const action = {
+        type: 'notes/toggleImportanceOf',
+        payload: 2
       }
-    }
   
     deepFreeze(state)
     const newState = noteReducer(state, action)

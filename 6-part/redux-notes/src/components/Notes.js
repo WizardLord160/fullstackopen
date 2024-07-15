@@ -16,7 +16,7 @@ const Notes = () => {
     if ( filter === 'ALL' ) {
       return notes
     }
-    return filter  === 'IMPORTANT' 
+    return filter === 'IMPORTANT' 
       ? notes.filter(note => note.important)
       : notes.filter(note => !note.important)
   })
